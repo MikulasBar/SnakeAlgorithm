@@ -19,38 +19,18 @@ namespace SnakeAl
             this.colDir = colDir;
         }
     }
-     class Position
-    {
-        public int Row;
-        public int Col;
-        public Position(int row, int col)
-        {
-            Row = row;
-            Col = col;
-        }
-    }
-    enum Value
-    {
-        Snake, Empty, Food, Border
-    }
     public partial class MainWindow : Window
     {
-        static readonly int rows = 40, cols = 40;
+        public static readonly int rows = 40 , cols = 40;
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
-        int dirRow, dirCol, dirPastR, dirPastC;
         bool gameOver = true;
-        static Random random = new Random();
-        LinkedList<Position> snakePositions = new LinkedList<Position>();
-        Value[,] Grid0 = new Value[rows,cols];
+        static Random random = new Random(); Algorithm al = new Algorithm();
+        LinkedList<Position> snakePositions = new LinkedList<Position>(); Position foodPos;
+        LinkedList<Position> keyPositions = new LinkedList<Position>();
+        static int[,] Fcost = new int[rows, cols];
         Border[,] cells = new Border[rows,cols];
-        Dictionary<Value, SolidColorBrush> dict = new() 
-        {
-            {Value.Empty, new SolidColorBrush(Color.FromRgb(49,44,64))},
-            {Value.Snake, Brushes.Lime}, 
-            {Value.Food, Brushes.Red},
-            {Value.Border, Brushes.Black}
-        };
+        SolidColorBrush empty = new SolidColorBrush(Color.FromRgb(49,44,64));
         void Setup()
         {
             snakePositions = new LinkedList<Position>();
@@ -59,33 +39,18 @@ namespace SnakeAl
                 for(int c = 0; c < cols; c++)
                 {
                     if(r == 0 || c == 0 || r == rows-1 || c == cols-1)
-                        Grid0[r,c] = Value.Border;
+                        cells[r,c].Background = Brushes.Black;
                     else
-                        Grid0[r,c] = Value.Empty;
+                        cells[r,c].Background = empty;
                 }
             }
             for(int n = 1; n < 4; n++)
             {
-                Grid0[1,n] = Value.Snake;
+                cells[1,n].Background = Brushes.Lime;
                 snakePositions.AddFirst(new Position(1, n)); 
             }
             Dir.rowDir = 0; Dir.colDir = 1; pastDir.rowDir = 0; pastDir.colDir = 1;
             AddFood();
-        }
-        void Draw()
-        {
-            for(int r = 0; r < rows; r++)
-            {
-                for(int c = 0; c < cols; c++)
-                {
-                    Value val = Grid0[r,c];
-                    if(val == Value.Empty && r%2 == c%2)
-                        cells[r,c].Background = new SolidColorBrush(Color.FromRgb(45, 40, 60));
-                    else
-                        cells[r,c].Background = dict[val];
-                    
-                }
-            }
         }
         IEnumerable<Position> EmptyPositions()
         {
@@ -93,38 +58,39 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    if(Grid0[r,c] == Value.Empty)
+                    if(cells[r,c].Background == empty)
                         yield return new Position(r,c);
                 }
             }
         }
         void AddFood()
         {
-            List<Position> empty = new List<Position>(EmptyPositions());
-            if(empty.Count == 0)
+            List<Position> emptys = new List<Position>(EmptyPositions());
+            if(emptys.Count == 0)
                 return;
-            Position pos = empty[random.Next(empty.Count)];
-            Grid0[pos.Row, pos.Col] = Value.Food;
+            foodPos = emptys[random.Next(emptys.Count)];
+            cells[foodPos.Row, foodPos.Col].Background = Brushes.Red;
+            keyPositions = al.AStar(cells, snakePositions.First.Value, foodPos);
         }
         void Move()
         {
             Position newpos = new Position(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
-            if(Grid0[newpos.Row, newpos.Col] == Value.Snake || Grid0[newpos.Row, newpos.Col] == Value.Border)
+            if(cells[newpos.Row, newpos.Col].Background == Brushes.Lime || cells[newpos.Row, newpos.Col].Background == Brushes.Black)
             {
                 Task.Delay(50);
                 gameOver = true;
                 return;
             }
-            if(Grid0[newpos.Row, newpos.Col] == Value.Food)
+            if(cells[newpos.Row, newpos.Col].Background == Brushes.Red)
             {
-                Grid0[newpos.Row, newpos.Col] = Value.Snake;
+                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
                 snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
                 AddFood();
             }
-            else if(Grid0[newpos.Row, newpos.Col] == Value.Empty)
+            else if(cells[newpos.Row, newpos.Col].Background == empty)
             {
-                Grid0[newpos.Row, newpos.Col] = Value.Snake;
-                Grid0[snakePositions.Last.Value.Row, snakePositions.Last.Value.Col] = Value.Empty;
+                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
+                cells[snakePositions.Last.Value.Row, snakePositions.Last.Value.Col].Background = empty;
                 snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
                 snakePositions.RemoveLast();
             }
@@ -135,12 +101,27 @@ namespace SnakeAl
         {
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
+            if(keyPositions.Count != 0)
+            {
+                if(keyPositions.First.Value != snakePositions.First.Value)
+                {
+                    Dir = al.FindPath(cells, snakePositions.First.Value, keyPositions.First.Value);
+                }
+                else
+                {
+                    keyPositions.RemoveFirst();
+                }
+            }
+            else
+            {
+                Dir = al.FindPath(cells, snakePositions.First.Value, foodPos);
+            }
+            
             await Task.Delay(35);
             if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
                 Dir.rowDir = pastDir.rowDir;
             if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
                 Dir.colDir = pastDir.colDir;
-            Draw();
             Move();
             await Run();
         }
@@ -171,16 +152,6 @@ namespace SnakeAl
         {
             InitializeComponent();
             for(int r = 0; r < rows; r++)
-            {
-                for(int c = 0; c < cols; c++)
-                {
-                    if(r == 0 || c == 0 || r == rows-1 || c == cols-1)
-                        Grid0[r,c] = Value.Border;
-                    else
-                        Grid0[r,c] = Value.Empty;
-                }
-            }
-            for(int r = 0; r < rows; r++)
                 grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(20)});
             for(int c = 0; c < cols; c++)
                 grid.ColumnDefinitions.Add(new ColumnDefinition {Width = new GridLength(20)});
@@ -188,11 +159,20 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    Value val = Grid0[r,c];
-                    cells[r,c] = new Border {Background = dict[val]};
+                    cells[r,c] = new Border();
                     Grid.SetRow(cells[r,c], r);
                     Grid.SetColumn(cells[r,c], c);
                     grid.Children.Add(cells[r,c]);
+                }
+            }
+            for(int r = 0; r < rows; r++)
+            {
+                for(int c = 0; c < cols; c++)
+                {
+                    if(r == 0 || c == 0 || r == rows-1 || c == cols-1)
+                        cells[r,c].Background = Brushes.Black;
+                    else
+                        cells[r,c].Background = empty;
                 }
             }
         }
