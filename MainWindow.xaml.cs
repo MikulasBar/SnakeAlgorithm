@@ -103,20 +103,13 @@ namespace SnakeAl
                 await Task.Delay(Timeout.Infinite);
             if(keyPositions.Count != 0)
             {
-                if(keyPositions.First.Value != snakePositions.First.Value)
-                {
-                    Dir = al.FindPath(cells, snakePositions.First.Value, keyPositions.First.Value);
-                }
-                else
-                {
-                    keyPositions.RemoveFirst();
-                }
+                Dir = al.FindPath(cells, snakePositions.First.Value, keyPositions.First.Value);
+                keyPositions.RemoveFirst();
             }
             else
             {
                 Dir = al.FindPath(cells, snakePositions.First.Value, foodPos);
             }
-            
             await Task.Delay(35);
             if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
                 Dir.rowDir = pastDir.rowDir;
