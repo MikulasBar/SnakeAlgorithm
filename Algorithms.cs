@@ -20,7 +20,7 @@ namespace SnakeAl
             }*/
             return cells[pos.Row + rowO, pos.Col + colO].Background == Brushes.Lime || cells[pos.Row + rowO, pos.Col + colO].Background == Brushes.Black;
         }
-        public Direction FindPath(Border[,] cells, Position start, Position end)
+        public Direction NextMove(Border[,] cells, Position start, Position end)
         {
             int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
             if(start == end)
