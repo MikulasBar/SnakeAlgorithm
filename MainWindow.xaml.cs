@@ -11,7 +11,7 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 20 , cols = 20;
+        public static readonly int rows = 16 , cols = 16;
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
         bool gameOver = true;
@@ -151,7 +151,7 @@ namespace SnakeAl
         }
         void Path()
         {
-            if(snakePositions.Count > (rows-2)*(cols-2) - 50)
+            if(snakePositions.Count > (rows-2)*(cols-2) - (rows-2)*4)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             else if(Conditions())
             {
