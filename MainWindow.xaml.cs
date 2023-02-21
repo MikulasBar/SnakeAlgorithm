@@ -11,7 +11,7 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 26 , cols = 26;
+        public static readonly int rows = 16 , cols = 16;
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
         bool gameOver = true;
@@ -64,7 +64,7 @@ namespace SnakeAl
         void SetOrder()
         {
             Position pos = new Position(0,0);
-            for(int i = 0; i < (rows) * (cols); i++)
+            for(int i = 0; i < rows * cols; i++)
             {
                 order[pos.Row,pos.Col] = i;
                 pos = new Position(pos.Row + defaultDirs[pos.Row,pos.Col].rowDir, pos.Col + defaultDirs[pos.Row, pos.Col].colDir);
@@ -73,18 +73,6 @@ namespace SnakeAl
         int Order(Position pos)
         {
             return order[pos.Row,pos.Col];
-        }
-        Position ReverseOrder(int i)
-        {
-            for(int r = 0; r < rows; r++)
-            {
-                for(int c = 0; c < cols; c++)
-                {
-                    if(order[r,c] == i)
-                        return new Position(r,c);
-                }
-            }
-            return new Position(0,0);
         }
         IEnumerable<Position> EmptyPositions()
         {
@@ -145,7 +133,7 @@ namespace SnakeAl
         }
         void Path()
         {
-            if(snakePositions.Count > (rows)*(cols) - (rows)*5 + 10)
+            if(snakePositions.Count > rows*cols - rows*5 + 10)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             else if(Conditions())
             {
@@ -156,7 +144,7 @@ namespace SnakeAl
             }
             else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1)
             {
-                AstarPath = al.AStar(cells, snakePositions.First.Value, ReverseOrder((rows)*(cols)-1), order);
+                AstarPath = al.AStar(cells, snakePositions.First.Value, new Position(1,0), order);
                 Dir = al.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
@@ -170,11 +158,6 @@ namespace SnakeAl
                 await Task.Delay(Timeout.Infinite);
             Path();
             //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
-            if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
-                Dir.rowDir = pastDir.rowDir;
-            if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
-                Dir.colDir = pastDir.colDir;
-                
             Move();
             await Run();
         }

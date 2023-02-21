@@ -50,7 +50,7 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cells.GetLength(1); c++)
                 {
-                    if(WillHit(cells, new Position(r,c),0 ,0) || order[r,c] > order[end.Row, end.Col] || order[r,c] < order[start.Row,start.Col])
+                    if(order[r,c] > order[end.Row, end.Col] || order[r,c] < order[start.Row,start.Col])
                     {
                         grid[r,c] = 5;
                     }
@@ -137,12 +137,9 @@ namespace SnakeAl
                     for(int c = -1; c < 2; c++)
                     {
                         Position n = new Position(pos.Row + r, pos.Col + c);
-                        if((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0))
+                        if((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0)
+                           || grid[n.Row,n.Col] == 4 || grid[n.Row,n.Col] == 5)
                         {
-                            continue;
-                        }
-                        if(grid[n.Row,n.Col] == 4 || grid[n.Row,n.Col] == 5)
-                        { 
                             continue;
                         }
                         if(grid[n.Row, n.Col] != 3 || DistanceOnObserved(parents[n.Row, n.Col], start, parents) > DistanceOnObserved(pos, start, parents))
