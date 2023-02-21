@@ -4,8 +4,8 @@ namespace SnakeAl
 {
     class Position
     {
-        public int Row = 0;
-        public int Col = 0;
+        public int Row;
+        public int Col;
         public Position(int row, int col)
         {
             Row = row;

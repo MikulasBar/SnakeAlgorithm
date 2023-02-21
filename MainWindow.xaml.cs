@@ -11,11 +11,11 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 16 , cols = 16;
+        public static readonly int rows = 26 , cols = 26;
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
         bool gameOver = true;
-        static Random random = new Random(); Algorithm al = new Algorithm();
+        static Random random = new Random(); PathAlgorithm al = new PathAlgorithm();
         LinkedList<Position> snakePositions = new LinkedList<Position>(); Position foodPos;
         LinkedList<Position> AstarPath = new LinkedList<Position>();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
@@ -28,49 +28,43 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    if(r == 0 || c == 0 || r == rows-1 || c == cols-1)
-                        cells[r,c].Background = Brushes.Black;
-                    else
-                        cells[r,c].Background = empty;
+                    cells[r,c].Background = empty;
                 }
             }
-            for(int n = 1; n < 4; n++)
+            for(int n = 0; n < 3; n++)
             {
-                cells[1,n].Background = Brushes.Lime;
-                snakePositions.AddFirst(new Position(1, n)); 
+                cells[0,n].Background = Brushes.Lime;
+                snakePositions.AddFirst(new Position(0, n)); 
             }
-            Dir.rowDir = 0; Dir.colDir = 1; pastDir.rowDir = 0; pastDir.colDir = 1;
+            Dir = new Direction(0,1); pastDir = new Direction(0,1);
             AddFood();
         }
         void SetDefaultDirs()
         {
-            for(int r = 1; r < rows-1; r++)
+            for(int r = 0; r < rows; r++)
             {
                 if(r%2 == 1)
                 {
-                    defaultDirs[r,rows -2] = new Direction(1,0);
-                    for(int c = 1; c < cols -2; c++)
-                        defaultDirs[r,c] = new Direction(0,1);
-                }
-                if(r%2 == 0)
-                {
                     
-                    for(int c = 2; c < cols -1; c++)
+                    for(int c = 1; c < cols; c++)
                         defaultDirs[r,c] = new Direction(0,-1);
+                    defaultDirs[r,1] = new Direction(1,0);
+                }
+                else
+                {
+                    defaultDirs[r,cols -1] = new Direction(1,0);
+                    for(int c = 0; c < cols -1; c++)
+                        defaultDirs[r,c] = new Direction(0,1);
                 } 
             }
-            for(int r = 2; r < rows -1; r++)
-                defaultDirs[r,1] = new Direction(-1, 0);
-            for(int r = 2; r < rows -2; r++)
-            {
-                if(r%2 == 0)
-                    defaultDirs[r,2] = new Direction(1,0);
-            }
+            for(int r = 1; r < rows; r++)
+                defaultDirs[r,0] = new Direction(-1, 0);
+            defaultDirs[rows-1, 1] = new Direction(0,-1);
         }
         void SetOrder()
         {
-            Position pos = new Position(1,1);
-            for(int i = 0; i < (rows-2) * (cols-2); i++)
+            Position pos = new Position(0,0);
+            for(int i = 0; i < (rows) * (cols); i++)
             {
                 order[pos.Row,pos.Col] = i;
                 pos = new Position(pos.Row + defaultDirs[pos.Row,pos.Col].rowDir, pos.Col + defaultDirs[pos.Row, pos.Col].colDir);
@@ -82,9 +76,9 @@ namespace SnakeAl
         }
         Position ReverseOrder(int i)
         {
-            for(int r = 1; r < rows-1; r++)
+            for(int r = 0; r < rows; r++)
             {
-                for(int c = 1; c < cols-1; c++)
+                for(int c = 0; c < cols; c++)
                 {
                     if(order[r,c] == i)
                         return new Position(r,c);
@@ -114,7 +108,7 @@ namespace SnakeAl
         void Move()
         {
             Position newpos = new Position(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
-            if(cells[newpos.Row, newpos.Col].Background == Brushes.Lime || cells[newpos.Row, newpos.Col].Background == Brushes.Black)
+            if(al.WillHit(cells, newpos,0 ,0 ))
             {
                 Task.Delay(50);
                 gameOver = true;
@@ -151,7 +145,7 @@ namespace SnakeAl
         }
         void Path()
         {
-            if(snakePositions.Count > (rows-2)*(cols-2) - (rows-2)*4)
+            if(snakePositions.Count > (rows)*(cols) - (rows)*5 + 10)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             else if(Conditions())
             {
@@ -160,9 +154,9 @@ namespace SnakeAl
                 Dir = al.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
-            else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows-2)*(cols-2)-1)
+            else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1)
             {
-                AstarPath = al.AStar(cells, snakePositions.First.Value, ReverseOrder((rows-2)*(cols-2)-1), order);
+                AstarPath = al.AStar(cells, snakePositions.First.Value, ReverseOrder((rows)*(cols)-1), order);
                 Dir = al.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
@@ -171,14 +165,16 @@ namespace SnakeAl
         }
         async Task Run()
         {
+            await Task.Delay(1);
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
             Path();
+            //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
                 Dir.rowDir = pastDir.rowDir;
             if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
                 Dir.colDir = pastDir.colDir;
-                await Task.Delay(1);
+                
             Move();
             await Run();
         }
@@ -219,10 +215,7 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    if(r == 0 || c == 0 || r == rows-1 || c == cols-1)
-                        cells[r,c].Background = Brushes.Black;
-                    else
-                        cells[r,c].Background = empty;
+                    cells[r,c].Background = empty;
                 }
             }
         }
