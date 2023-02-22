@@ -31,36 +31,14 @@ namespace SnakeAl
                     cells[r,c].Background = empty;
                 }
             }
-            for(int n = 0; n < 3; n++)
+            for(int n = 0; n < 2; n++)
             {
                 cells[0,n].Background = Brushes.Lime;
-                snakePositions.AddFirst(new Position(0, n)); 
+                snakePositions.AddFirst(new Position(0,n)); 
             }
             Dir = new Direction(0,1); pastDir = new Direction(0,1);
             (defaultDirs, order) = aP.HamiltonsCycle(rows, cols);
             AddFood();
-        }
-        void SetDefaultDirs()
-        {
-            for(int r = 0; r < rows; r++)
-            {
-                if(r%2 == 1)
-                {
-                    
-                    for(int c = 1; c < cols; c++)
-                        defaultDirs[r,c] = new Direction(0,-1);
-                    defaultDirs[r,1] = new Direction(1,0);
-                }
-                else
-                {
-                    defaultDirs[r,cols -1] = new Direction(1,0);
-                    for(int c = 0; c < cols -1; c++)
-                        defaultDirs[r,c] = new Direction(0,1);
-                } 
-            }
-            for(int r = 1; r < rows; r++)
-                defaultDirs[r,0] = new Direction(-1, 0);
-            defaultDirs[rows-1, 1] = new Direction(0,-1);
         }
         int Order(Position pos)
         {
@@ -145,7 +123,7 @@ namespace SnakeAl
         }
         async Task Run()
         {
-            await Task.Delay(1);
+            await Task.Delay(12);
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
             //Path();

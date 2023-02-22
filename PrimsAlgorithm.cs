@@ -6,13 +6,22 @@ namespace SnakeAl
 {
     class PrimsAlgorithm
     {
+        bool SameDir(Direction dir1, Direction dir2)
+        {
+            return dir1.rowDir == dir2.rowDir && dir1.colDir == dir2.colDir;
+        }
+        bool SamePos(Position pos1, Position pos2)
+        {
+            return pos1.Row == pos2.Row && pos1.Col == pos2.Col;
+        }
         bool IsActive(List<Edge> edges, Position nA, Position nB)
         {
             foreach(Edge e in edges)
             {
-                if(e.NodeA == nA && e.NodeB == nB && e.active)
+                if((SamePos(e.NodeA, nA) && SamePos(e.NodeB, nB)) 
+                || (SamePos(e.NodeA,nB) && SamePos(e.NodeB, nA)))
                 {
-                    return true;
+                    return e.active;
                 }
             }
             return false;
@@ -22,7 +31,7 @@ namespace SnakeAl
             Position newpos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             Position node = new Position((pos.Row - pos.Row%2)/2, (pos.Col - pos.Col%2)/2);
             Position newnode = new Position((newpos.Row - newpos.Row%2)/2, (newpos.Col - newpos.Col%2)/2);
-            if(node != newnode)
+            if(!SamePos(node, newnode))
             {
                 return true;
             }
@@ -68,7 +77,8 @@ namespace SnakeAl
             int index = 0, min = int.MaxValue;
             foreach(Edge i in edges)
             {
-                if(nodes[i.NodeA.Row, i.NodeA.Col] == 0 && nodes[i.NodeB.Row, i.NodeB.Col] == 0 || i.active == true)
+                if((nodes[i.NodeA.Row, i.NodeA.Col] == 0 && nodes[i.NodeB.Row, i.NodeB.Col] == 0) 
+                || i.active == true || (nodes[i.NodeA.Row, i.NodeA.Col] == 1 && nodes[i.NodeB.Row, i.NodeB.Col] == 1))
                 {
                     continue;
                 }
@@ -121,23 +131,19 @@ namespace SnakeAl
             List<Edge> edges = MST(rows, cols);
             Direction dir = new Direction(0,1);
             Position pos = new Position(0,1);
-            Dictionary<Direction, Direction> rotate = new ()
-            {
-                {new Direction(0,1), new Direction(1,0)}, {new Direction(1,0), new Direction(0,-1)},
-                {new Direction(0,-1), new Direction(-1,0)}, {new Direction(-1,0), new Direction(0,1)}
-            };
             for(int i = 1; i < rows*cols; i++)
             {
                 order[pos.Row, pos.Col] = i;
-                if(CanStep(edges, pos, rotate[dir]))
+                if(CanStep(edges, pos, dir.Rotate("right")))
                 {
-                    dir = rotate[dir];
+                    dir = dir.Rotate("right");
                 }
                 else if(CanStep(edges, pos, dir)) {}
-                else if(CanStep(edges, pos, rotate.First(x => x.Value == dir).Key))
+                else if(CanStep(edges, pos, dir.Rotate("left")))
                 {
-                    dir = rotate.First(x => x.Value == dir).Key;
+                    dir = dir.Rotate("left");
                 }
+                dirs[pos.Row, pos.Col] = dir;
                 pos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             }
             order[0,0] = 0; dirs[0,0] = new Direction(0,1);

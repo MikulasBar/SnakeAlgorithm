@@ -5,12 +5,13 @@ namespace SnakeAl
     {
         public int value;
         public Position NodeA, NodeB;
-        public bool active = false;
+        public bool active;
         public Edge(Position nodeA, Position nodeB)
         {
             Random rn = new Random();
-            value = rn.Next(1,4);
+            value = rn.Next(1,6);
             NodeA = nodeA; NodeB = nodeB;
+            active = false;
         }
     }
 }
