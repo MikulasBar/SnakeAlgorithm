@@ -1,17 +1,52 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace SnakeAl
 {
     class PrimsAlgorithm
     {
-        bool CanStep(List<Edge> edges, Position pos, Position newpos)
+        bool IsActive(List<Edge> edges, Position nA, Position nB)
         {
+            foreach(Edge e in edges)
+            {
+                if(e.NodeA == nA && e.NodeB == nB && e.active)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool CanStep(List<Edge> edges, Position pos, Direction dir)
+        {
+            Position newpos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             Position node = new Position((pos.Row - pos.Row%2)/2, (pos.Col - pos.Col%2)/2);
             Position newnode = new Position((newpos.Row - newpos.Row%2)/2, (newpos.Col - newpos.Col%2)/2);
             if(node != newnode)
             {
                 return true;
+            }
+            if(pos.Row == newpos.Row)
+            {
+                if(pos.Row % 2 == 0)
+                {
+                    return !IsActive(edges, node, new Position(node.Row -1, node.Col));
+                }
+                else
+                {
+                    return !IsActive(edges, node, new Position(node.Row +1, node.Col));
+                }
+            }
+            else
+            {
+                if(pos.Col % 2 == 0)
+                {
+                    return !IsActive(edges, node, new Position(node.Row, node.Col -1));
+                }
+                else
+                {
+                    return !IsActive(edges, node, new Position(node.Row, node.Col +1));
+                }
             }
         }
         bool AllVisited(int[,] nodes)
@@ -94,18 +129,18 @@ namespace SnakeAl
             for(int i = 1; i < rows*cols; i++)
             {
                 order[pos.Row, pos.Col] = i;
-                if()
+                if(CanStep(edges, pos, rotate[dir]))
                 {
                     dir = rotate[dir];
                 }
-                else if()
+                else if(CanStep(edges, pos, dir)) {}
+                else if(CanStep(edges, pos, rotate.First(x => x.Value == dir).Key))
                 {
-                    dir = rotate[dir];
-                    dir.rowDir *= -1;
-                    dir.colDir *= -1;
+                    dir = rotate.First(x => x.Value == dir).Key;
                 }
                 pos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             }
+            order[0,0] = 0; dirs[0,0] = new Direction(0,1);
             return (dirs, order);
         }
     }

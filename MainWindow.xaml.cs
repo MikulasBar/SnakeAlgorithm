@@ -15,7 +15,7 @@ namespace SnakeAl
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
         bool gameOver = true;
-        static Random random = new Random(); PathAlgorithm al = new PathAlgorithm();
+        static Random random = new Random(); PathAlgorithm aS = new PathAlgorithm(); PrimsAlgorithm aP = new PrimsAlgorithm();
         LinkedList<Position> snakePositions = new LinkedList<Position>(); Position foodPos;
         LinkedList<Position> AstarPath = new LinkedList<Position>();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
@@ -37,6 +37,7 @@ namespace SnakeAl
                 snakePositions.AddFirst(new Position(0, n)); 
             }
             Dir = new Direction(0,1); pastDir = new Direction(0,1);
+            (defaultDirs, order) = aP.HamiltonsCycle(rows, cols);
             AddFood();
         }
         void SetDefaultDirs()
@@ -60,15 +61,6 @@ namespace SnakeAl
             for(int r = 1; r < rows; r++)
                 defaultDirs[r,0] = new Direction(-1, 0);
             defaultDirs[rows-1, 1] = new Direction(0,-1);
-        }
-        void SetOrder()
-        {
-            Position pos = new Position(0,0);
-            for(int i = 0; i < rows * cols; i++)
-            {
-                order[pos.Row,pos.Col] = i;
-                pos = new Position(pos.Row + defaultDirs[pos.Row,pos.Col].rowDir, pos.Col + defaultDirs[pos.Row, pos.Col].colDir);
-            }
         }
         int Order(Position pos)
         {
@@ -96,7 +88,7 @@ namespace SnakeAl
         void Move()
         {
             Position newpos = new Position(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
-            if(al.WillHit(cells, newpos,0 ,0 ))
+            if(aS.WillHit(cells, newpos,0 ,0 ))
             {
                 Task.Delay(50);
                 gameOver = true;
@@ -138,14 +130,14 @@ namespace SnakeAl
             else if(Conditions())
             {
                 if(AstarPath.Count == 0)
-                    AstarPath = al.AStar(cells, snakePositions.First.Value, foodPos, order);
-                Dir = al.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
+                    AstarPath = aS.AStar(cells, snakePositions.First.Value, foodPos, order);
+                Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
             else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1)
             {
-                AstarPath = al.AStar(cells, snakePositions.First.Value, new Position(1,0), order);
-                Dir = al.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
+                AstarPath = aS.AStar(cells, snakePositions.First.Value, new Position(1,0), order);
+                Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
             else
@@ -156,8 +148,8 @@ namespace SnakeAl
             await Task.Delay(1);
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
-            Path();
-            //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
+            //Path();
+            Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             Move();
             await Run();
         }
@@ -178,8 +170,7 @@ namespace SnakeAl
         public MainWindow()
         {
             InitializeComponent();
-            SetDefaultDirs();
-            SetOrder();
+            //SetDefaultDirs();
             for(int r = 0; r < rows; r++)
                 grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength((int)800/rows)});
             for(int c = 0; c < cols; c++)
