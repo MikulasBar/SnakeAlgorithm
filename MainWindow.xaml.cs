@@ -13,7 +13,7 @@ namespace SnakeAl
     {
         public static readonly int rows = 20 , cols = 20;
         Direction Dir, pastDir;
-        bool gameOver = true; Position foodPos;
+        bool gameOver = true; bool starting; Position foodPos;
         static Random random = new Random(); PathAlgorithm aS = new PathAlgorithm(); PrimsAlgorithm aP = new PrimsAlgorithm();
         LinkedList<Position> snakePositions = new LinkedList<Position>(), AstarPath = new LinkedList<Position>();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
@@ -21,6 +21,7 @@ namespace SnakeAl
         SolidColorBrush empty = new SolidColorBrush(Color.FromRgb(49,44,64));
         void Setup()
         {
+            starting = true;
             snakePositions = new LinkedList<Position>();
             for(int r = 0; r < rows; r++)
             {
@@ -94,24 +95,34 @@ namespace SnakeAl
             }
             else
             {
-                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value)-rows*7 ;
+                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value)-rows ;
             }
             return a;
         }
         void Path()
         {
+            if(snakePositions.Count > 30)
+                starting = false;
             if(snakePositions.Count > rows*cols - rows*7.5)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
-            else if(Conditions())
+            else if(starting && Order(foodPos) > Order(snakePositions.First.Value))
             {
                 if(AstarPath.Count == 0)
                     AstarPath = aS.AStar(cells, snakePositions.First.Value, foodPos, order);
                 Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
+                //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             }
-            else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1)
+            else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1 && Order(snakePositions.First.Value) > Order(foodPos))
             {
                 AstarPath = aS.AStar(cells, snakePositions.First.Value, new Position(1,0), order);
+                Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
+                AstarPath.RemoveFirst();
+            } 
+            else if(Conditions())
+            {
+                if(AstarPath.Count == 0)
+                    AstarPath = aS.AStar(cells, snakePositions.First.Value, foodPos, order);
                 Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
