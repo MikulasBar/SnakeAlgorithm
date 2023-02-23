@@ -17,7 +17,7 @@ namespace SnakeAl
         }
         public static bool operator !=(Position a, Position b)
         {
-            return  a.Row != b.Row && a.Col != b.Col;
+            return  a.Row != b.Row || a.Col != b.Col;
         }
         public static (int,int) operator -(Position a, Position b)
         {

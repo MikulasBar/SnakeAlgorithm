@@ -11,13 +11,11 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 24 , cols = 24;
-        Direction Dir = new Direction(0,1);
-        Direction pastDir = new Direction(0,1);
-        bool gameOver = true;
+        public static readonly int rows = 20 , cols = 20;
+        Direction Dir, pastDir;
+        bool gameOver = true; Position foodPos;
         static Random random = new Random(); PathAlgorithm aS = new PathAlgorithm(); PrimsAlgorithm aP = new PrimsAlgorithm();
-        LinkedList<Position> snakePositions = new LinkedList<Position>(); Position foodPos;
-        LinkedList<Position> AstarPath = new LinkedList<Position>();
+        LinkedList<Position> snakePositions = new LinkedList<Position>(), AstarPath = new LinkedList<Position>();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
         int[,] order = new int[rows,cols];
         SolidColorBrush empty = new SolidColorBrush(Color.FromRgb(49,44,64));
@@ -77,12 +75,12 @@ namespace SnakeAl
                 snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
                 AddFood();
             }
-            else if(cells[newpos.Row, newpos.Col].Background == empty)
+            else if(cells[newpos.Row, newpos.Col].Background == empty || newpos == snakePositions.Last.Value)
             {
-                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
                 cells[snakePositions.Last.Value.Row, snakePositions.Last.Value.Col].Background = empty;
-                snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
+                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
                 snakePositions.RemoveLast();
+                snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
             }
             pastDir.rowDir = Dir.rowDir;
             pastDir.colDir = Dir.colDir;
@@ -96,13 +94,13 @@ namespace SnakeAl
             }
             else
             {
-                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value);
+                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value)-rows*7 ;
             }
             return a;
         }
         void Path()
         {
-            if(snakePositions.Count > rows*cols - rows*5 + 10)
+            if(snakePositions.Count > rows*cols - rows*7.5)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             else if(Conditions())
             {
@@ -122,11 +120,10 @@ namespace SnakeAl
         }
         async Task Run()
         {
-            await Task.Delay(12);
+            await Task.Delay(5);
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
             Path();
-            //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
                 Dir.rowDir = pastDir.rowDir;
             if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)

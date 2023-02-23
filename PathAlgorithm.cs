@@ -19,7 +19,7 @@ namespace SnakeAl
         }
         public Direction NextMove(Border[,] cells, Position start, Position end)
         {
-            /*int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
+            int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
             if(start == end)
                 return new Direction(0,0);
             if(!WillHit(cells, start, 1,0))
@@ -41,17 +41,17 @@ namespace SnakeAl
                 return new Direction(0,1);
             if(min == left)
                 return new Direction(0,-1);
-            return new Direction(0,0);*/
-            (int r, int c) = start - end;
-            if(r > 0)
-                return new Direction(-1,0);
-            if(r < 0)
-                return new Direction(1,0);
-            if(c > 0)
-                return new Direction(0,-1);
-            if(c < 0)
-                return new Direction(0,1);
             return new Direction(0,0);
+            /*(int r, int c) = start - end;
+            if(r > 0 && !WillHit(cells, start, -1, 0))
+                return new Direction(-1,0);
+            else if(r < 0 && !WillHit(cells, start, 1, 0))
+                return new Direction(1,0);
+            else if(c > 0 && !WillHit(cells, start, 0, -1))
+                return new Direction(0,-1);
+            else if(c < 0 && !WillHit(cells, start, 0, 1))
+                return new Direction(0,1);
+            return new Direction(0,0);*/
         }
         public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
         {
@@ -77,7 +77,7 @@ namespace SnakeAl
         }
         Position FindLowestF(int[,] grid, int[,] fcosts)
         {
-            int min = int.MaxValue, j = 0, k = 0;
+            int min = int.MaxValue, j = int.MinValue, k = int.MinValue;
             for(int r = 0; r < grid.GetLength(0); r++)
             {
                 for(int c = 0; c < grid.GetLength(1); c++)
