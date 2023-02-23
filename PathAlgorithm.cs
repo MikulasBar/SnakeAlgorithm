@@ -19,7 +19,7 @@ namespace SnakeAl
         }
         public Direction NextMove(Border[,] cells, Position start, Position end)
         {
-            int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
+            /*int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
             if(start == end)
                 return new Direction(0,0);
             if(!WillHit(cells, start, 1,0))
@@ -41,16 +41,28 @@ namespace SnakeAl
                 return new Direction(0,1);
             if(min == left)
                 return new Direction(0,-1);
+            return new Direction(0,0);*/
+            (int r, int c) = start - end;
+            if(r > 0)
+                return new Direction(-1,0);
+            if(r < 0)
+                return new Direction(1,0);
+            if(c > 0)
+                return new Direction(0,-1);
+            if(c < 0)
+                return new Direction(0,1);
             return new Direction(0,0);
         }
         public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
         {
             int[,] grid = new int[cells.GetLength(0),cells.GetLength(1)];
+            
             for(int r = 0; r < cells.GetLength(0); r++)
             {
                 for(int c = 0; c < cells.GetLength(1); c++)
                 {
-                    if(order[r,c] > order[end.Row, end.Col] || order[r,c] < order[start.Row,start.Col])
+                    bool co = order[r,c] < order[start.Row,start.Col];
+                    if(order[r,c] > order[end.Row, end.Col] || co)
                     {
                         grid[r,c] = 5;
                     }

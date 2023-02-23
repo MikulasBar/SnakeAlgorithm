@@ -6,20 +6,12 @@ namespace SnakeAl
 {
     class PrimsAlgorithm
     {
-        bool SameDir(Direction dir1, Direction dir2)
-        {
-            return dir1.rowDir == dir2.rowDir && dir1.colDir == dir2.colDir;
-        }
-        bool SamePos(Position pos1, Position pos2)
-        {
-            return pos1.Row == pos2.Row && pos1.Col == pos2.Col;
-        }
         bool IsActive(List<Edge> edges, Position nA, Position nB)
         {
             foreach(Edge e in edges)
             {
-                if((SamePos(e.NodeA, nA) && SamePos(e.NodeB, nB)) 
-                || (SamePos(e.NodeA,nB) && SamePos(e.NodeB, nA)))
+                if((e.NodeA == nA && e.NodeB == nB) 
+                || (e.NodeA == nB && e.NodeB == nA))
                 {
                     return e.active;
                 }
@@ -31,31 +23,21 @@ namespace SnakeAl
             Position newpos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             Position node = new Position((pos.Row - pos.Row%2)/2, (pos.Col - pos.Col%2)/2);
             Position newnode = new Position((newpos.Row - newpos.Row%2)/2, (newpos.Col - newpos.Col%2)/2);
-            if(!SamePos(node, newnode))
-            {
+            if(node != newnode)
                 return true;
-            }
             if(pos.Row == newpos.Row)
             {
                 if(pos.Row % 2 == 0)
-                {
                     return !IsActive(edges, node, new Position(node.Row -1, node.Col));
-                }
                 else
-                {
                     return !IsActive(edges, node, new Position(node.Row +1, node.Col));
-                }
             }
             else
             {
                 if(pos.Col % 2 == 0)
-                {
                     return !IsActive(edges, node, new Position(node.Row, node.Col -1));
-                }
                 else
-                {
                     return !IsActive(edges, node, new Position(node.Row, node.Col +1));
-                }
             }
         }
         bool AllVisited(int[,] nodes)

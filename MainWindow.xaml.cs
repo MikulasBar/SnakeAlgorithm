@@ -11,7 +11,7 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 16 , cols = 16;
+        public static readonly int rows = 24 , cols = 24;
         Direction Dir = new Direction(0,1);
         Direction pastDir = new Direction(0,1);
         bool gameOver = true;
@@ -68,7 +68,6 @@ namespace SnakeAl
             Position newpos = new Position(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
             if(aS.WillHit(cells, newpos,0 ,0 ))
             {
-                Task.Delay(50);
                 gameOver = true;
                 return;
             }
@@ -126,8 +125,12 @@ namespace SnakeAl
             await Task.Delay(12);
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
-            //Path();
-            Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
+            Path();
+            //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
+            if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
+                Dir.rowDir = pastDir.rowDir;
+            if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
+                Dir.colDir = pastDir.colDir;
             Move();
             await Run();
         }
@@ -148,7 +151,6 @@ namespace SnakeAl
         public MainWindow()
         {
             InitializeComponent();
-            //SetDefaultDirs();
             for(int r = 0; r < rows; r++)
                 grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength((int)800/rows)});
             for(int c = 0; c < cols; c++)
