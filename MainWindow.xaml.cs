@@ -95,13 +95,13 @@ namespace SnakeAl
             }
             else
             {
-                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value)-rows ;
+                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value);
             }
             return a;
         }
         void Path()
         {
-            if(snakePositions.Count > 30)
+            if(snakePositions.Count > 2)
                 starting = false;
             if(snakePositions.Count > rows*cols - rows*7.5)
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
@@ -111,7 +111,6 @@ namespace SnakeAl
                     AstarPath = aS.AStar(cells, snakePositions.First.Value, foodPos, order);
                 Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
-                //Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             }
             else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1 && Order(snakePositions.First.Value) > Order(foodPos))
             {
@@ -135,10 +134,10 @@ namespace SnakeAl
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
             Path();
-            if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
+            /*if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
                 Dir.rowDir = pastDir.rowDir;
             if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
-                Dir.colDir = pastDir.colDir;
+                Dir.colDir = pastDir.colDir;*/
             Move();
             await Run();
         }

@@ -19,7 +19,7 @@ namespace SnakeAl
         }
         public Direction NextMove(Border[,] cells, Position start, Position end)
         {
-            int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
+            /*int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
             if(start == end)
                 return new Direction(0,0);
             if(!WillHit(cells, start, 1,0))
@@ -41,8 +41,8 @@ namespace SnakeAl
                 return new Direction(0,1);
             if(min == left)
                 return new Direction(0,-1);
-            return new Direction(0,0);
-            /*(int r, int c) = start - end;
+            return new Direction(0,0);*/
+            (int r, int c) = start - end;
             if(r > 0 && !WillHit(cells, start, -1, 0))
                 return new Direction(-1,0);
             else if(r < 0 && !WillHit(cells, start, 1, 0))
@@ -51,7 +51,7 @@ namespace SnakeAl
                 return new Direction(0,-1);
             else if(c < 0 && !WillHit(cells, start, 0, 1))
                 return new Direction(0,1);
-            return new Direction(0,0);*/
+            return new Direction(0,0);
         }
         public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
         {
@@ -61,8 +61,8 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cells.GetLength(1); c++)
                 {
-                    bool co = order[r,c] < order[start.Row,start.Col];
-                    if(order[r,c] > order[end.Row, end.Col] || co)
+                    //bool co = order[r,c] < order[start.Row,start.Col];
+                    if(order[r,c] > order[end.Row, end.Col])
                     {
                         grid[r,c] = 5;
                     }
@@ -150,7 +150,7 @@ namespace SnakeAl
                     {
                         Position n = new Position(pos.Row + r, pos.Col + c);
                         if((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0)
-                           || grid[n.Row,n.Col] == 4 || grid[n.Row,n.Col] == 5)
+                           || grid[n.Row,n.Col] == 4 || grid[n.Row,n.Col] == 5 || order[n.Row, n.Col] < order[pos.Row, pos.Col])
                         {
                             continue;
                         }
