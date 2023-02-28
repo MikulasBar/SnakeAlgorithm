@@ -12,9 +12,7 @@ namespace SnakeAl
             {
                 if((e.NodeA == nA && e.NodeB == nB) 
                 || (e.NodeA == nB && e.NodeB == nA))
-                {
                     return e.active;
-                }
             }
             return false;
         }
@@ -47,9 +45,7 @@ namespace SnakeAl
                 for(int c = 0; c < nodes.GetLength(1); c++)
                 {
                     if(nodes[r,c] == 0)
-                    {
                         return false;
-                    }
                 }
             }
             return true;
@@ -60,7 +56,7 @@ namespace SnakeAl
             foreach(Edge i in edges)
             {
                 if((nodes[i.NodeA.Row, i.NodeA.Col] == 0 && nodes[i.NodeB.Row, i.NodeB.Col] == 0) 
-                || i.active == true || (nodes[i.NodeA.Row, i.NodeA.Col] == 1 && nodes[i.NodeB.Row, i.NodeB.Col] == 1))
+                || (nodes[i.NodeA.Row, i.NodeA.Col] == 1 && nodes[i.NodeB.Row, i.NodeB.Col] == 1))
                 {
                     continue;
                 }
@@ -96,13 +92,9 @@ namespace SnakeAl
                 Edge edge = edges[MinimalEdge(nodes, edges)];
                 edges[MinimalEdge(nodes, edges)].active = true;
                 if(nodes[edge.NodeA.Row, edge.NodeA.Col] == 0)
-                {
                     nodes[edge.NodeA.Row, edge.NodeA.Col] = 1;
-                }
                 else
-                {
                     nodes[edge.NodeB.Row, edge.NodeB.Col] = 1;
-                }
             }
             return edges;
         }
@@ -115,20 +107,17 @@ namespace SnakeAl
             Position pos = new Position(0,1);
             for(int i = 1; i < rows*cols; i++)
             {
-                order[pos.Row, pos.Col] = i;
                 if(CanStep(edges, pos, dir.Rotate("right")))
-                {
                     dir = dir.Rotate("right");
-                }
                 else if(CanStep(edges, pos, dir)) {}
                 else if(CanStep(edges, pos, dir.Rotate("left")))
-                {
                     dir = dir.Rotate("left");
-                }
+                
+                order[pos.Row, pos.Col] = i;
                 dirs[pos.Row, pos.Col] = dir;
                 pos = new Position(pos.Row + dir.rowDir, pos.Col + dir.colDir);
             }
-            order[0,0] = 0; dirs[0,0] = new Direction(0,1);
+            dirs[0,0] = new Direction(0,1);
             return (dirs, order);
         }
     }

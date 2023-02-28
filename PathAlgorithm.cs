@@ -19,29 +19,6 @@ namespace SnakeAl
         }
         public Direction NextMove(Border[,] cells, Position start, Position end)
         {
-            /*int up = int.MaxValue, down = int.MaxValue, right = int.MaxValue, left = int.MaxValue;
-            if(start == end)
-                return new Direction(0,0);
-            if(!WillHit(cells, start, 1,0))
-                down = Distance(start, end, 1, 0);
-            if(!WillHit(cells, start, 0,1))
-                right = Distance(start, end, 0, 1);
-            if(!WillHit(cells, start, -1,0))
-                up = Distance(start, end, -1, 0);
-            if(!WillHit(cells, start, 0,-1))
-                left = Distance(start, end, 0, -1);
-
-            int min = Math.Min(Math.Min(up, down) , Math.Min(right, left));
-
-            if(min == up)
-                return new Direction(-1,0);
-            if(min == down)
-                return new Direction(1,0);
-            if(min == right)
-                return new Direction(0,1);
-            if(min == left)
-                return new Direction(0,-1);
-            return new Direction(0,0);*/
             (int r, int c) = start - end;
             if(r > 0 && !WillHit(cells, start, -1, 0))
                 return new Direction(-1,0);
@@ -56,20 +33,14 @@ namespace SnakeAl
         public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
         {
             int[,] grid = new int[cells.GetLength(0),cells.GetLength(1)];
-            
             for(int r = 0; r < cells.GetLength(0); r++)
             {
                 for(int c = 0; c < cells.GetLength(1); c++)
                 {
-                    //bool co = order[r,c] < order[start.Row,start.Col];
                     if(order[r,c] > order[end.Row, end.Col])
-                    {
                         grid[r,c] = 5;
-                    }
                     else
-                    {
                         grid[r,c] = 2;
-                    }
                 }
             }
             grid[start.Row, start.Col] = 3;
@@ -101,9 +72,7 @@ namespace SnakeAl
             while(true)
             {
                 if(pos == end)
-                {
                     return d;
-                }
                 d++;
                 pos = parents[pos.Row,pos.Col];
             }
@@ -114,10 +83,8 @@ namespace SnakeAl
             Position pos = new Position(end.Row, end.Col);
             while(true)
             {
-                if(pos.Row == start.Row && pos.Col == start.Col)
-                {
+                if(pos == start)
                     return path;
-                }
                 path.AddFirst(pos);
                 pos = parents[pos.Row, pos.Col];
             }
@@ -130,9 +97,7 @@ namespace SnakeAl
             for(int r = 0; r < grid.GetLength(0); r++)
             {
                 for(int c = 0; c < grid.GetLength(1); c++)
-                {
                     fcosts[r,c] = int.MaxValue;
-                }
             }
             fcosts[start.Row, start.Col] = Distance(start , end, 0, 0);
             parents[start.Row, start.Col] = start;
@@ -140,7 +105,7 @@ namespace SnakeAl
             {
                 Position pos = FindLowestF(grid, fcosts);
                 grid[pos.Row, pos.Col] = 4;
-                if(pos.Row == end.Row && pos.Col == end.Col)
+                if(pos == end)
                 {
                     return Path(grid, parents, end, start);
                 }
@@ -150,7 +115,7 @@ namespace SnakeAl
                     {
                         Position n = new Position(pos.Row + r, pos.Col + c);
                         if((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0)
-                           || grid[n.Row,n.Col] == 4 || grid[n.Row,n.Col] == 5 || order[n.Row, n.Col] < order[pos.Row, pos.Col])
+                           || grid[n.Row,n.Col] == 4 || order[n.Row, n.Col] < order[pos.Row, pos.Col])
                         {
                             continue;
                         }
@@ -159,9 +124,7 @@ namespace SnakeAl
                             parents[n.Row, n.Col] = pos;
                             fcosts[n.Row, n.Col] = Distance(n, end, 0, 0) + DistanceOnObserved(n, start, parents);
                             if(grid[n.Row,n.Col] != 3)
-                            {
                                 grid[n.Row, n.Col] = 3;
-                            } 
                         }
                     }    
                 }
