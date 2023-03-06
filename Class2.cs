@@ -1,0 +1,137 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Media;
+
+namespace WpfApp1
+{
+    class PathAlgorithm
+    {
+        public int Distance(Position start, Position end, int rowO, int colO)
+        {
+            return (int)(Math.Abs(start.Row - end.Row + rowO) + Math.Abs(start.Col - end.Col + colO));
+        }
+        public bool WillHit(Border[,] cells, Position pos, int rowO, int colO)
+        {
+            Position newpos = new Position(pos.Row + rowO, pos.Col + colO);
+            return newpos.Row == -1 || newpos.Col == -1 || newpos.Row == cells.GetLength(0) || newpos.Col == cells.GetLength(1) || cells[newpos.Row, newpos.Col].Background == Brushes.Lime;
+        }
+        public Direction NextMove(Border[,] cells, Position start, Position end)
+        {
+            (int r, int c) = start - end;
+            if (r > 0 && !WillHit(cells, start, -1, 0))
+                return new Direction(-1, 0);
+            else if (r < 0 && !WillHit(cells, start, 1, 0))
+                return new Direction(1, 0);
+            else if (c > 0 && !WillHit(cells, start, 0, -1))
+                return new Direction(0, -1);
+            else if (c < 0 && !WillHit(cells, start, 0, 1))
+                return new Direction(0, 1);
+            return new Direction(0, 0);
+        }
+        public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
+        {
+            int[,] grid = new int[cells.GetLength(0), cells.GetLength(1)];
+            for (int r = 0; r < cells.GetLength(0); r++)
+            {
+                for (int c = 0; c < cells.GetLength(1); c++)
+                {
+                    if (order[r, c] > order[end.Row, end.Col])
+                        grid[r, c] = 5;
+                    else
+                        grid[r, c] = 2;
+                }
+            }
+            grid[start.Row, start.Col] = 3;
+            return grid;
+        }
+        Position FindLowestF(int[,] grid, int[,] fcosts)
+        {
+            int min = int.MaxValue, j = int.MinValue, k = int.MinValue;
+            for (int r = 0; r < grid.GetLength(0); r++)
+            {
+                for (int c = 0; c < grid.GetLength(1); c++)
+                {
+                    if (grid[r, c] == 3)
+                    {
+                        if (min > fcosts[r, c])
+                        {
+                            min = fcosts[r, c];
+                            j = r; k = c;
+                        }
+                    }
+                }
+            }
+            return new Position(j, k);
+        }
+        int DistanceOnObserved(Position start, Position end, Position[,] parents)
+        {
+            int d = 0;
+            Position pos = start;
+            while (true)
+            {
+                if (pos == end)
+                    return d;
+                d++;
+                pos = parents[pos.Row, pos.Col];
+            }
+        }
+        LinkedList<Position> Path(int[,] grid, Position[,] parents, Position end, Position start)
+        {
+            LinkedList<Position> path = new LinkedList<Position>();
+            Position pos = new Position(end.Row, end.Col);
+            while (true)
+            {
+                if (pos == start)
+                    return path;
+                path.AddFirst(pos);
+                pos = parents[pos.Row, pos.Col];
+            }
+        }
+        public LinkedList<Position> AStar(Border[,] cells, Position start, Position end, int[,] order)
+        {
+            int[,] grid = SetForAStar(cells, start, order, end);
+            int[,] fcosts = new int[cells.GetLength(0), cells.GetLength(1)];
+            Position[,] parents = new Position[cells.GetLength(0), cells.GetLength(1)];
+            for (int r = 0; r < grid.GetLength(0); r++)
+            {
+                for (int c = 0; c < grid.GetLength(1); c++)
+                    fcosts[r, c] = int.MaxValue;
+            }
+            fcosts[start.Row, start.Col] = Distance(start, end, 0, 0);
+            parents[start.Row, start.Col] = start;
+            while (true)    //  2 = unrevealed, 3 = revealed, 4 = path, 5 = not traversable
+            {
+                Position pos = FindLowestF(grid, fcosts);
+                grid[pos.Row, pos.Col] = 4;
+                if (pos == end)
+                {
+                    return Path(grid, parents, end, start);
+                }
+                for (int r = -1; r < 2; r++)
+                {
+                    for (int c = -1; c < 2; c++)
+                    {
+                        Position n = new Position(pos.Row + r, pos.Col + c);
+                        if ((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0)
+                           || grid[n.Row, n.Col] == 4 || order[n.Row, n.Col] < order[pos.Row, pos.Col])
+                        {
+                            continue;
+                        }
+                        if (grid[n.Row, n.Col] != 3 || DistanceOnObserved(parents[n.Row, n.Col], start, parents) > DistanceOnObserved(pos, start, parents))
+                        {
+                            parents[n.Row, n.Col] = pos;
+                            fcosts[n.Row, n.Col] = Distance(n, end, 0, 0) + DistanceOnObserved(n, start, parents);
+                            if (grid[n.Row, n.Col] != 3)
+                                grid[n.Row, n.Col] = 3;
+                        }
+                    }
+                }
+            }
+            return new LinkedList<Position>();
+        }
+    }
+}
