@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System;
+
 namespace SnakeAl
 {
     class Position
     {
-        public int Row;
-        public int Col;
+        public int Row, Col;
         public Position(int row, int col)
         {
             Row = row;
@@ -27,8 +26,7 @@ namespace SnakeAl
     }
     class Direction
     {
-        public int rowDir;
-        public int colDir;
+        public int rowDir, colDir;
         public Direction(int rowDir, int colDir)
         {
             this.rowDir = rowDir;
@@ -37,9 +35,9 @@ namespace SnakeAl
         public Direction Rotate(string d)
         {
             if(d == "right")
-                return new Direction(colDir, -rowDir);
+                return new(colDir,-rowDir);
             if(d == "left")
-                return new Direction(-colDir, rowDir);
+                return new(-colDir,rowDir);
             return this;
         }
     }
@@ -50,7 +48,7 @@ namespace SnakeAl
         public bool active;
         public Edge(Position nodeA, Position nodeB)
         {
-            Random rn = new Random();
+            Random rn = new();
             value = rn.Next(1,4);
             NodeA = nodeA; NodeB = nodeB;
             active = false;

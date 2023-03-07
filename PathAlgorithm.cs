@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System;
-using System.Linq;
 
 namespace SnakeAl
 {
@@ -14,21 +13,21 @@ namespace SnakeAl
         }
         public bool WillHit(Border[,] cells, Position pos, int rowO, int colO)
         {
-            Position newpos = new Position(pos.Row + rowO, pos.Col + colO);
+            Position newpos = new(pos.Row + rowO, pos.Col + colO);
             return newpos.Row == -1 || newpos.Col == -1 || newpos.Row == cells.GetLength(0) || newpos.Col == cells.GetLength(1) || cells[newpos.Row, newpos.Col].Background == Brushes.Lime;
         }
         public Direction NextMove(Border[,] cells, Position start, Position end)
         {
             (int r, int c) = start - end;
             if(r > 0 && !WillHit(cells, start, -1, 0))
-                return new Direction(-1,0);
+                return new(-1,0);
             else if(r < 0 && !WillHit(cells, start, 1, 0))
-                return new Direction(1,0);
+                return new(1,0);
             else if(c > 0 && !WillHit(cells, start, 0, -1))
-                return new Direction(0,-1);
+                return new(0,-1);
             else if(c < 0 && !WillHit(cells, start, 0, 1))
-                return new Direction(0,1);
-            return new Direction(0,0);
+                return new(0,1);
+            return new(0,0);
         }
         public int[,] SetForAStar(Border[,] cells, Position start, int[,] order, Position end)
         {
@@ -63,7 +62,7 @@ namespace SnakeAl
                     }
                 }
             }
-            return new Position(j,k);
+            return new(j,k);
         }
         int DistanceOnObserved(Position start ,Position end, Position[,] parents)
         {
@@ -79,8 +78,8 @@ namespace SnakeAl
         }
         LinkedList<Position> Path(int[,] grid, Position[,] parents, Position end, Position start)
         {
-            LinkedList<Position> path = new LinkedList<Position>();
-            Position pos = new Position(end.Row, end.Col);
+            LinkedList<Position> path = new();
+            Position pos = new(end.Row, end.Col);
             while(true)
             {
                 if(pos == start)
@@ -113,7 +112,7 @@ namespace SnakeAl
                 {
                     for(int c = -1; c < 2; c++)
                     {
-                        Position n = new Position(pos.Row + r, pos.Col + c);
+                        Position n = new(pos.Row + r, pos.Col + c);
                         if((r != 0 && c != 0) || (r == 0 && c == 0) || WillHit(cells, n, 0, 0)
                            || grid[n.Row,n.Col] == 4 || order[n.Row, n.Col] < order[pos.Row, pos.Col])
                         {
@@ -129,7 +128,7 @@ namespace SnakeAl
                     }    
                 }
             }
-            return new LinkedList<Position>();
+            return new();
         }
     }
 }

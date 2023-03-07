@@ -11,17 +11,17 @@ namespace SnakeAl
 {
     public partial class MainWindow : Window
     {
-        public static readonly int rows = 20 , cols = 20;
+        public static int rows = 20 , cols = 20;
         Direction Dir, pastDir;
         bool gameOver = true; Position foodPos;
-        static Random random = new Random(); PathAlgorithm aS = new PathAlgorithm(); PrimsAlgorithm aP = new PrimsAlgorithm();
-        LinkedList<Position> snakePositions = new LinkedList<Position>(), AstarPath = new LinkedList<Position>();
+        static Random random = new(); PathAlgorithm aS = new(); PrimsAlgorithm aP = new();
+        LinkedList<Position> snakePositions = new(), AstarPath = new();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
         int[,] order = new int[rows,cols];
-        SolidColorBrush empty = new SolidColorBrush(Color.FromRgb(49,44,64));
+        SolidColorBrush empty = new(Color.FromRgb(49,44,64));
         void Setup()
         {
-            snakePositions = new LinkedList<Position>();
+            snakePositions = new();
             for(int r = 0; r < rows; r++)
             {
                 for(int c = 0; c < cols; c++)
@@ -32,7 +32,7 @@ namespace SnakeAl
                 cells[0,n].Background = Brushes.Lime;
                 snakePositions.AddFirst(new Position(0,n)); 
             }
-            Dir = new Direction(0,1); pastDir = new Direction(0,1);
+            Dir = new(0,1); pastDir = new(0,1);
             (defaultDirs, order) = aP.HamiltonsCycle(rows, cols);
             AddFood();
         }
@@ -40,20 +40,22 @@ namespace SnakeAl
         {
             return order[pos.Row,pos.Col];
         }
-        IEnumerable<Position> EmptyPositions()
+        List<Position> EmptyPositions()
         {
+            List<Position> p = new();
             for(int r = 0; r < rows; r++)
             {
                 for(int c = 0; c < cols; c++)
                 {
                     if(cells[r,c].Background == empty)
-                        yield return new Position(r,c);
+                        p.Add(new(r,c));
                 }
             }
+            return p;
         }
         void AddFood()
         {
-            List<Position> emptys = new List<Position>(EmptyPositions());
+            List<Position> emptys = EmptyPositions();
             if(emptys.Count == 0)
                 return;
             foodPos = emptys[random.Next(emptys.Count)];
@@ -61,7 +63,7 @@ namespace SnakeAl
         }
         void Move()
         {
-            Position newpos = new Position(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
+            Position newpos = new(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
             if(aS.WillHit(cells, newpos,0 ,0 ))
             {
                 gameOver = true;
@@ -99,7 +101,7 @@ namespace SnakeAl
                 Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
             else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1 && Order(snakePositions.First.Value) > Order(foodPos))
             {
-                AstarPath = aS.AStar(cells, snakePositions.First.Value, new Position(1,0), order);
+                AstarPath = aS.AStar(cells, snakePositions.First.Value, new(1,0), order);
                 Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             } 
@@ -119,10 +121,6 @@ namespace SnakeAl
             if(gameOver)
                 await Task.Delay(Timeout.Infinite);
             Path();
-            /*if(pastDir.rowDir == -1*Dir.rowDir && Dir.rowDir != 0)
-                Dir.rowDir = pastDir.rowDir;
-            if(pastDir.colDir == -1*Dir.colDir && Dir.colDir != 0)
-                Dir.colDir = pastDir.colDir;*/
             Move();
             await Run();
         }
@@ -144,14 +142,14 @@ namespace SnakeAl
         {
             InitializeComponent();
             for(int r = 0; r < rows; r++)
-                grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength((int)800/rows)});
+                grid.RowDefinitions.Add(new RowDefinition {Height = new((int)800/rows)});
             for(int c = 0; c < cols; c++)
-                grid.ColumnDefinitions.Add(new ColumnDefinition {Width = new GridLength((int)800/cols)});
+                grid.ColumnDefinitions.Add(new ColumnDefinition {Width = new((int)800/cols)});
             for(int r = 0; r < rows; r++)
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    cells[r,c] = new Border();
+                    cells[r,c] = new();
                     Grid.SetRow(cells[r,c], r);
                     Grid.SetColumn(cells[r,c], c);
                     grid.Children.Add(cells[r,c]);
