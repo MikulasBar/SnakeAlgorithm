@@ -36,20 +36,10 @@ namespace SnakeAl
         }
         public Direction Rotate(string d)
         {
-            Dictionary<(int,int),(int,int)> dict = new ()
-            {
-                {(0,1), (1,0)},{(1,0), (0,-1)},
-                {(0,-1), (-1,0)},{(-1,0), (0,1)}
-            };
-            Direction dir = new Direction(dict[(this.rowDir,this.colDir)].Item1, dict[(this.rowDir,this.colDir)].Item2);
             if(d == "right")
-                return dir;
+                return new Direction(colDir, -rowDir);
             if(d == "left")
-            {
-                dir.rowDir *= -1;
-                dir.colDir *= -1;
-                return dir;
-            }
+                return new Direction(-colDir, rowDir);
             return this;
         }
     }
