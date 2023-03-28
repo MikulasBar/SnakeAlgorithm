@@ -12,13 +12,25 @@ namespace SnakeAl
     public partial class MainWindow : Window
     {
         public static int rows = 20 , cols = 20;
-        Direction Dir, pastDir;
+        Direction Dir, pastDir; string AstarType = "";
         bool gameOver = true; Position foodPos;
         static Random random = new(); PathAlgorithm aS = new(); PrimsAlgorithm aP = new();
         LinkedList<Position> snakePositions = new(), AstarPath = new();
         Border[,] cells = new Border[rows,cols]; Direction[,] defaultDirs = new Direction[rows,cols];
         int[,] order = new int[rows,cols];
         SolidColorBrush empty = new(Color.FromRgb(49,44,64));
+        Position Head()
+        {
+            return snakePositions.First.Value;
+        }
+        Position Tail()
+        {
+            return snakePositions.Last.Value;
+        }
+        Border Cell(Position pos)
+        {
+            return cells[pos.Row, pos.Col];
+        }
         void Setup()
         {
             snakePositions = new();
@@ -63,24 +75,24 @@ namespace SnakeAl
         }
         void Move()
         {
-            Position newpos = new(snakePositions.First.Value.Row + Dir.rowDir, snakePositions.First.Value.Col + Dir.colDir);
+            Position newpos = new(Head().Row + Dir.rowDir, Head().Col + Dir.colDir);
             if(aS.WillHit(cells, newpos,0 ,0 ))
             {
                 gameOver = true;
                 return;
             }
-            if(cells[newpos.Row, newpos.Col].Background == Brushes.Red)
+            if(Cell(newpos).Background == Brushes.Red)
             {
-                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
-                snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
+                Cell(newpos).Background = Brushes.Lime;
+                snakePositions.AddFirst(newpos);
                 AddFood();
             }
-            else if(cells[newpos.Row, newpos.Col].Background == empty || newpos == snakePositions.Last.Value)
+            else if(Cell(newpos).Background == empty || newpos == Tail())
             {
-                cells[snakePositions.Last.Value.Row, snakePositions.Last.Value.Col].Background = empty;
-                cells[newpos.Row, newpos.Col].Background = Brushes.Lime;
+                Cell(Tail()).Background = empty;
+                Cell(newpos).Background = Brushes.Lime;
                 snakePositions.RemoveLast();
-                snakePositions.AddFirst(new Position(newpos.Row, newpos.Col));
+                snakePositions.AddFirst(newpos);
             }
             pastDir.rowDir = Dir.rowDir;
             pastDir.colDir = Dir.colDir;
@@ -88,32 +100,32 @@ namespace SnakeAl
         bool Conditions()
         {
             bool a;
-            if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value))
-                a = Order(foodPos) > Order(snakePositions.First.Value);
+            if(Order(Head()) > Order(Tail()))
+                a = Order(foodPos) > Order(Head());
             else
-                a = Order(foodPos) > Order(snakePositions.First.Value) && Order(foodPos) < Order(snakePositions.Last.Value);
+                a = Order(foodPos) > Order(Head()) && Order(foodPos) < Order(Tail());
             return a;
         }
         void Path()
         {
-            
             if(snakePositions.Count > rows*cols - rows*7.5)
-                Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
-            else if(Order(snakePositions.First.Value) > Order(snakePositions.Last.Value) && Order(snakePositions.First.Value) != (rows)*(cols)-1 && Order(snakePositions.First.Value) > Order(foodPos))
+                Dir = defaultDirs[Head().Row, Head().Col];
+            else if(Order(Head()) > Order(Tail()) && Order(Head()) != (rows)*(cols)-1 && Order(Head()) > Order(foodPos))
             {
-                AstarPath = aS.AStar(cells, snakePositions.First.Value, new(1,0), order);
-                Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
+                if(AstarPath.Count == 0 || AstarType != "End")
+                    AstarPath = aS.AStar(cells, Head(), new(1,0), order); AstarType = "End";
+                Dir = aS.NextMove(cells, Head(), AstarPath.First.Value);
                 AstarPath.RemoveFirst();
-            } 
+            }
             else if(Conditions())
             {
-                if(AstarPath.Count == 0)
-                    AstarPath = aS.AStar(cells, snakePositions.First.Value, foodPos, order);
-                Dir = aS.NextMove(cells, snakePositions.First.Value, AstarPath.First.Value);
+                if(AstarPath.Count == 0 || AstarType != "Food")
+                    AstarPath = aS.AStar(cells, Head(), foodPos, order); AstarType = "Food";
+                Dir = aS.NextMove(cells, Head(), AstarPath.First.Value);
                 AstarPath.RemoveFirst();
             }
             else
-                Dir = defaultDirs[snakePositions.First.Value.Row, snakePositions.First.Value.Col];
+                Dir = defaultDirs[Head().Row, Head().Col];
         }
         async Task Run()
         {

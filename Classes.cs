@@ -20,8 +20,7 @@ namespace SnakeAl
         }
         public static (int,int) operator -(Position a, Position b)
         {
-            int rA = a.Row, rB = b.Row, cA = a.Col, cB = b.Col;
-            return (rA-rB,cA-cB);
+            return (a.Row - b.Row, a.Col - b.Col);
         }
     }
     class Direction

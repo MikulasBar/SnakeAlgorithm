@@ -128,7 +128,6 @@ namespace SnakeAl
                     }    
                 }
             }
-            return new();
         }
     }
 }
