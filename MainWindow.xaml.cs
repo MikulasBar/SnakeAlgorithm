@@ -59,7 +59,7 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cols; c++)
                 {
-                    if(cells[r,c].Background == empty)
+                    if(Cell(new(r,c)).Background == empty)
                         p.Add(new(r,c));
                 }
             }
@@ -71,7 +71,7 @@ namespace SnakeAl
             if(emptys.Count == 0)
                 return;
             foodPos = emptys[random.Next(emptys.Count)];
-            cells[foodPos.Row, foodPos.Col].Background = Brushes.Red;
+            Cell(foodPos).Background = Brushes.Red;
         }
         void Move()
         {
@@ -99,12 +99,7 @@ namespace SnakeAl
         }
         bool Conditions()
         {
-            bool a;
-            if(Order(Head()) > Order(Tail()))
-                a = Order(foodPos) > Order(Head());
-            else
-                a = Order(foodPos) > Order(Head()) && Order(foodPos) < Order(Tail());
-            return a;
+            return (Order(Head()) > Order(Tail())) ? Order(foodPos) > Order(Head()) : Order(foodPos) > Order(Head()) && Order(foodPos) < Order(Tail());
         }
         void Path()
         {

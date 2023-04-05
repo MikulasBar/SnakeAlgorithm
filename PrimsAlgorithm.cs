@@ -22,19 +22,9 @@ namespace SnakeAl
             if(node != newnode)
                 return true;
             if(pos.Row == newpos.Row)
-            {
-                if(pos.Row % 2 == 0)
-                    return !IsActive(edges, node, new(node.Row -1, node.Col));
-                else
-                    return !IsActive(edges, node, new(node.Row +1, node.Col));
-            }
+                return pos.Row % 2 == 0 ? !IsActive(edges, node, new(node.Row -1, node.Col)) : !IsActive(edges, node, new(node.Row +1, node.Col));
             else
-            {
-                if(pos.Col % 2 == 0)
-                    return !IsActive(edges, node, new(node.Row, node.Col -1));
-                else
-                    return !IsActive(edges, node, new(node.Row, node.Col +1));
-            }
+                return pos.Col % 2 == 0 ? !IsActive(edges, node, new(node.Row, node.Col -1)) : !IsActive(edges, node, new(node.Row, node.Col +1));
         }
         bool AllVisited(int[,] nodes)
         {

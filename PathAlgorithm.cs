@@ -36,10 +36,7 @@ namespace SnakeAl
             {
                 for(int c = 0; c < cells.GetLength(1); c++)
                 {
-                    if(order[r,c] > order[end.Row, end.Col])
-                        grid[r,c] = 5;
-                    else
-                        grid[r,c] = 2;
+                    grid[r,c] = order[r,c] > order[end.Row, end.Col] ? 5 : 2;
                 }
             }
             grid[start.Row, start.Col] = 3;
@@ -52,13 +49,10 @@ namespace SnakeAl
             {
                 for(int c = 0; c < grid.GetLength(1); c++)
                 {
-                    if(grid[r,c] == 3)
+                    if(min > fcosts[r,c] && grid[r,c] == 3)
                     {
-                        if(min > fcosts[r,c])
-                        {
-                            min = fcosts[r,c];
-                            j = r; k = c;
-                        }
+                        min = fcosts[r,c];
+                        j = r; k = c;
                     }
                 }
             }
@@ -93,6 +87,7 @@ namespace SnakeAl
             int[,] grid = SetForAStar(cells, start, order, end);
             int[,] fcosts = new int[cells.GetLength(0),cells.GetLength(1)];
             Position[,] parents = new Position[cells.GetLength(0),cells.GetLength(1)];
+
             for(int r = 0; r < grid.GetLength(0); r++)
             {
                 for(int c = 0; c < grid.GetLength(1); c++)
@@ -100,14 +95,14 @@ namespace SnakeAl
             }
             fcosts[start.Row, start.Col] = Distance(start , end, 0, 0);
             parents[start.Row, start.Col] = start;
+            
             while(true)    //  2 = unrevealed, 3 = revealed, 4 = path, 5 = not traversable
             {
                 Position pos = FindLowestF(grid, fcosts);
                 grid[pos.Row, pos.Col] = 4;
+
                 if(pos == end)
-                {
                     return Path(grid, parents, end, start);
-                }
                 for(int r = -1; r < 2; r++)
                 {
                     for(int c = -1; c < 2; c++)
@@ -122,8 +117,7 @@ namespace SnakeAl
                         {
                             parents[n.Row, n.Col] = pos;
                             fcosts[n.Row, n.Col] = Distance(n, end, 0, 0) + DistanceOnObserved(n, start, parents);
-                            if(grid[n.Row,n.Col] != 3)
-                                grid[n.Row, n.Col] = 3;
+                            grid[n.Row, n.Col] = grid[n.Row,n.Col] != 3 ? 3 : grid[n.Row, n.Col];
                         }
                     }    
                 }

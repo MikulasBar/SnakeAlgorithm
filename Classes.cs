@@ -2,7 +2,7 @@ using System;
 
 namespace SnakeAl
 {
-    class Position
+    struct Position
     {
         public int Row, Col;
         public Position(int row, int col)
@@ -23,7 +23,7 @@ namespace SnakeAl
             return (a.Row - b.Row, a.Col - b.Col);
         }
     }
-    class Direction
+    struct Direction
     {
         public int rowDir, colDir;
         public Direction(int rowDir, int colDir)
@@ -33,11 +33,7 @@ namespace SnakeAl
         }
         public Direction Rotate(string d)
         {
-            if(d == "right")
-                return new(colDir,-rowDir);
-            if(d == "left")
-                return new(-colDir,rowDir);
-            return this;
+            return d == "right" ? new(colDir, -rowDir) : d == "left" ? new(-colDir, rowDir) : this;
         }
     }
     class Edge
