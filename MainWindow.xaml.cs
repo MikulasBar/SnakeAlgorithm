@@ -69,7 +69,7 @@ namespace SnakeAl
         void Move() // Move snake by 1 position in direction Dir, all possibilities
         {
             Position newpos = new(Head().Row + Dir.rowDir, Head().Col + Dir.colDir);
-            if(aS.WillHit(cells, newpos,0 ,0 ))
+            if(aS.WillHit(cells, newpos, 0, 0))
             {
                 gameOver = true;
                 return;
@@ -126,18 +126,22 @@ namespace SnakeAl
             Move();
             await Run();
         }
-        async void Window_PreviewKeyDown(object sender, KeyEventArgs e) // Inputs
+        async void PKeyDown(object sender, KeyEventArgs e) // Inputs
         {
-            if(gameOver) // Gameover and any key pressed
-            { 
-                gameOver = false;
-                Setup();
-                await Run();
-            }
-            else if(e.Key == Key.R) // Reset game with R key
+            if(e.Key == Key.R) // Reset
             {
                 gameOver = true;
                 Setup();
+            }
+            else if(e.Key == Key.S) // Start / Stop
+            {
+                if(gameOver == true)
+                {
+                    gameOver = false;
+                    await Run();
+                }
+                else
+                    gameOver = true;
             }
         }
         public MainWindow() // Set grid

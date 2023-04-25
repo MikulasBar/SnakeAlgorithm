@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:SnakeAl"
         mc:Ignorable="d"
         Title="SnakeAl" Height="800" Width="800"
-        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewKeyDown="PKeyDown"
         Background="#211E2B">
-        <Grid x:Name="grid"
+        <Grid x:Name="grid" 
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Height="800" Width="800"
