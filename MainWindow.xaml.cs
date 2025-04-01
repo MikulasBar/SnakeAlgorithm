@@ -117,14 +117,14 @@ namespace SnakeAl
             else // The snake just follow cycle
                 Dir = defaultDirs[Head().Row, Head().Col];
         }
-        async Task Run() // Combining game and algorithm for controling the snake
+        async Task Run() // Combining game and algorithm for controlling the snake
         {
-            await Task.Delay(5); // Delay
-            if(gameOver)
-                await Task.Delay(Timeout.Infinite);
-            Path();
-            Move();
-            await Run();
+            while (!gameOver)
+            {
+                await Task.Delay(5); // Delay
+                Path();
+                Move();
+            }
         }
         async void PKeyDown(object sender, KeyEventArgs e) // Inputs
         {
